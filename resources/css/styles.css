@@ -32,7 +32,10 @@ body {
     gap: 10px;
 }
 
-#channel-name {
+#channel-name,
+input[type="number"],
+input[type="time"],
+input[type="date"] {
     color: #e0e0e0;
     background-color: rgb(58, 58, 58);
     line-height: 1.5;
@@ -108,6 +111,85 @@ body {
     justify-content: center;
     height: 107px;
     width: 75px;
+}
+
+#config {
+    display: flex;
+    height: 50px;
+    width: 240px;
+    background-color: #3a3a3a;
+    flex-direction: column;
+    justify-content: space-evenly;
+    align-items: flex-start;
+    box-sizing: content-box;
+    border-radius: 15px;
+    padding: 15px;
+    gap: 8px;
+    border: 5px solid transparent;
+}
+
+.counter-value {
+    display: inline;
+    width: 240px;
+}
+
+.counter-value>.label {
+    display: inline-block;
+    width: 50px;
+}
+
+.counter-value>span {
+    display: inline-block;
+    margin: 0px 2px;
+}
+
+#limit-time {
+    display: flex;
+    flex-direction: row;
+    justify-items: center;
+    align-items: flex-start;
+    gap: 4px;
+}
+
+.limit-config {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-evenly;
+    align-items: flex-start;
+    gap: 10px;
+}
+
+.limit-config > div {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    gap: 5px;
+}
+
+input[type="number"] {
+    width: 40px;
+    text-align: center;
+    -webkit-appearance: none;
+}
+
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+}
+
+input[type="date"] {
+    width: 95px;
+}
+
+input[type="time"],
+input[type="date"] {
+    padding: 1px 4px;
+}
+
+input[type="time"]::-webkit-calendar-picker-indicator,
+input[type="date"]::-webkit-calendar-picker-indicator {
+    filter: invert(1);
 }
 
 #pause-button,

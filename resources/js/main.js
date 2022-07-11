@@ -1,6 +1,7 @@
 let countDownDate = null
 let countDownWorker = null
 let timeLeft = 0
+let maxTimeValue = 0
 let running = false
 let pause = false
 let ws = null
@@ -11,15 +12,25 @@ const pauseButton = document.querySelector('#pause-button')
 const hoursLabel = document.getElementById('hours')
 const minutesLabel = document.getElementById('mins')
 const secondsLabel = document.getElementById('secs')
+const maxTime = document.querySelector('#max-time')
+const maxTimeDiv = document.querySelector('#max-time-div')
+const timeLimit = document.querySelector('#time-limit')
+const dateLimit = document.querySelector('#date-limit')
+const enableLimit = document.querySelector('#enable-limit')
 
 startButton.onclick = startCountDown
 pauseButton.onclick = pauseCountDown
+timeLimit.oninput = updateTimeLeft
+dateLimit.oninput = updateTimeLeft
+maxTime.oninput = updateDeadEnd
+enableLimit.onclick = showLimits
 
 async function startCountDown() {
     if (channelName.value !== '') {
         if (startButton.value === 'Começar') {
             saveData()
             switchMode(true)
+            maxTimeValue = new Date().getTime() + parseFloat(maxTime.value) * 60 * 60 * 1000
             countDownDate = new Date().getTime() + (timeLeft > 0 ? timeLeft + 1000 : 1000)
             countDownWorker = new Worker('js/worker.js')
             countDownWorker.onmessage = countDownFunction
@@ -31,7 +42,11 @@ async function startCountDown() {
             
             ws.onmessage = function (msg) {
                 console.log(msg.data)
-                countDownDate += parseFloat(msg.data)
+                if (!enableLimit.checked || (countDownDate + parseFloat(msg.data)) <= maxTimeValue) {
+                    countDownDate += parseFloat(msg.data)
+                } else {
+                    countDownDate = maxTimeValue
+                }
             }
         } else {
             pauseButton.value = 'Pausar'
@@ -141,6 +156,44 @@ function switchMode(state) {
 
     running = state
     channelName.disabled = state
+}
+
+function updateTimeLeft() {
+    const now = new Date().getTime()
+    const limit = new Date(`${dateLimit.value}T${timeLimit.value}`).getTime()
+    let timeLeft = limit - now
+    timeLeft = timeLeft / (1000 * 60 * 60)
+    maxTime.value = timeLeft.toFixed(1)
+}
+
+function updateDeadEnd() {
+    if (maxTime.value === '' || isNaN(parseFloat(maxTime.value))) {
+        maxTime.value = ''
+    } else {
+        const now = new Date().getTime()
+        const timeLeft = parseFloat(maxTime.value) * 60 * 60 * 1000
+        const deadEnd = new Date(now + timeLeft)
+        const hours = deadEnd.getHours() < 10 ? "0" + deadEnd.getHours() : deadEnd.getHours()
+        const minutes = deadEnd.getMinutes() < 10 ? "0" + deadEnd.getMinutes() : deadEnd.getMinutes()
+        const day = (deadEnd.getDate() < 10) ? "0" + deadEnd.getDate() : deadEnd.getDate()
+        const month = (deadEnd.getMonth() + 1) < 10 ? "0" + (deadEnd.getMonth() + 1) : deadEnd.getMonth() + 1
+        const year = deadEnd.getFullYear()
+    
+        timeLimit.value = `${hours}:${minutes}`
+        dateLimit.value = `${year}-${month}-${day}`
+    }
+}
+
+function showLimits() {
+    if (enableLimit.checked) {
+        maxTimeDiv.removeAttribute('hidden')
+        timeLimit.removeAttribute('hidden')
+        dateLimit.removeAttribute('hidden')
+    } else {
+        maxTimeDiv.setAttribute('hidden', true)
+        timeLimit.setAttribute('hidden', true)
+        dateLimit.setAttribute('hidden', true)
+    }
 }
 
 async function saveData() {

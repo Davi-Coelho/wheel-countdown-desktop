@@ -4,7 +4,8 @@
 <head>
   <meta charset="UTF-8">
   <title>Wheel Countdown Desktop</title>
-  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="css/slider.css">
+  <link rel="stylesheet" href="css/styles.css">
 </head>
 
 <body>
@@ -47,6 +48,27 @@
         <div class="lower-buttons">
           <input type="button" id="sub-decimal-seconds" onclick="changeTimer(this)">
           <input type="button" id="sub-unit-seconds" onclick="changeTimer(this)">
+        </div>
+      </div>
+    </div>
+    <div id="config">
+      <div id="limit-time" class="counter-value">
+        <span class="label">Limite: </span>
+        <div class="limit-config">
+          <div>
+            <div id="max-time-div" hidden>
+              <input type="number" name="max-time" id="max-time" value="0" min="0">
+              <span>horas</span>
+            </div>
+            <label class="switch">
+              <input type="checkbox" name="enable-limit" id="enable-limit">
+              <span class="slider round"></span>
+            </label>
+          </div>
+          <div>
+            <input type="time" name="time-limit" id="time-limit" value="00:00" hidden>
+            <input type="date" name="date-limit" id="date-limit" value="1970-01-01" hidden>
+          </div>
         </div>
       </div>
     </div>
