@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <title>Wheel Countdown Desktop</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+  <div id="neutralinoapp">
+    <div id="channel">
+      <span>Canal:</span>
+      <input type="text" name="channel-name" id="channel-name">
+    </div>
+    <div id="timer">
+      <div class="time-section">
+        <div class="upper-buttons">
+          <input type="button" id="add-decimal-hours" onclick="changeTimer(this)">
+          <input type="button" id="add-unit-hours" onclick="changeTimer(this)">
+        </div>
+        <span id="hours">00</span>
+        <div class="lower-buttons">
+          <input type="button" id="sub-decimal-hours" onclick="changeTimer(this)">
+          <input type="button" id="sub-unit-hours" onclick="changeTimer(this)">
+        </div>
+      </div>
+      <span>:</span>
+      <div class="time-section">
+        <div class="upper-buttons">
+          <input type="button" id="add-decimal-minutes" onclick="changeTimer(this)">
+          <input type="button" id="add-unit-minutes" onclick="changeTimer(this)">
+        </div>
+        <span id="mins">00</span>
+        <div class="lower-buttons">
+          <input type="button" id="sub-decimal-minutes" onclick="changeTimer(this)">
+          <input type="button" id="sub-unit-minutes" onclick="changeTimer(this)">
+        </div>
+      </div>
+      <span>:</span>
+      <div class="time-section">
+        <div class="upper-buttons">
+          <input type="button" id="add-decimal-seconds" onclick="changeTimer(this)">
+          <input type="button" id="add-unit-seconds" onclick="changeTimer(this)">
+        </div>
+        <span id="secs">00</span>
+        <div class="lower-buttons">
+          <input type="button" id="sub-decimal-seconds" onclick="changeTimer(this)">
+          <input type="button" id="sub-unit-seconds" onclick="changeTimer(this)">
+        </div>
+      </div>
+    </div>
+    <div id="controls">
+      <input id="pause-button" type="button" value="Pausar" hidden>
+      <input id="start-button" type="button" value="Começar">
+    </div>
+  </div>
+  <script src="js/neutralino.js"></script>
+  <script src="js/main.js"></script>
+</body>
+
+</html>
