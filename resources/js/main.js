@@ -4,9 +4,11 @@ let timeLeft = 0
 let maxTimeValue = 0
 let running = false
 let pause = false
+let edit = false
 let ws = null
 
 const channelName = document.querySelector('#channel-name')
+const configDiv = document.querySelector('#config')
 const startButton = document.querySelector('#start-button')
 const pauseButton = document.querySelector('#pause-button')
 const hoursLabel = document.getElementById('hours')
@@ -17,9 +19,11 @@ const maxTimeDiv = document.querySelector('#max-time-div')
 const timeLimit = document.querySelector('#time-limit')
 const dateLimit = document.querySelector('#date-limit')
 const enableLimit = document.querySelector('#enable-limit')
+const editButton = document.querySelector('#edit-button')
 
 startButton.onclick = startCountDown
 pauseButton.onclick = pauseCountDown
+editButton.onclick = editConfig
 timeLimit.oninput = updateTimeLeft
 dateLimit.oninput = updateTimeLeft
 maxTime.oninput = updateDeadEnd
@@ -147,23 +151,33 @@ function switchMode(state) {
         startButton.value = 'Parar'
         startButton.classList.add('connected')
         pauseButton.removeAttribute('hidden')
+        editButton.removeAttribute('hidden')
 
     } else {
         startButton.value = 'Começar'
         startButton.classList.remove('connected')
         pauseButton.setAttribute('hidden', true)
+        editButton.setAttribute('hidden', true)
     }
 
     running = state
     channelName.disabled = state
+    switchInputs(state)
+}
+
+function switchInputs(state) {
+    maxTime.disabled = state
+    enableLimit.disabled = state
+    timeLimit.disabled = state
+    dateLimit.disabled = state
 }
 
 function updateTimeLeft() {
     const now = new Date().getTime()
     const limit = new Date(`${dateLimit.value}T${timeLimit.value}`).getTime()
-    let timeLeft = limit - now
-    timeLeft = timeLeft / (1000 * 60 * 60)
-    maxTime.value = timeLeft.toFixed(1)
+    let timeLeft2 = limit - now
+    timeLeft2 = timeLeft2 / (1000 * 60 * 60)
+    maxTime.value = timeLeft2.toFixed(1)
 }
 
 function updateDeadEnd() {
@@ -196,10 +210,27 @@ function showLimits() {
     }
 }
 
+async function editConfig() {
+    if (edit) {
+        configDiv.style.border = '5px solid transparent'
+        maxTimeValue = new Date().getTime() + parseFloat(maxTime.value) * 60 * 60 * 1000
+        await saveData()
+        switchInputs(true)
+        edit = false
+    } else {
+        configDiv.style.border = '5px solid green'
+        switchInputs(false)
+        edit = true
+    }
+}
+
 async function saveData() {
     await Neutralino.storage.setData('wheelConfig',
         JSON.stringify({
-            channelName: channelName.value
+            channelName: channelName.value,
+            timeLimit: timeLimit.value,
+            dateLimit: dateLimit.value,
+            enableLimit: enableLimit.checked
         })
     )
 }
@@ -210,10 +241,26 @@ async function loadConfig() {
 
         if (data) {
             channelName.value = data.channelName
+            timeLimit.value = data.timeLimit
+            dateLimit.value = data.dateLimit
+            enableLimit.checked = data.enableLimit
+
+            updateTimeLeft()
         }
     } catch (e) {
+        const now = new Date(new Date().getTime() + 3600000)
+        const hours = now.getHours() < 10 ? "0" + now.getHours() : now.getHours()
+        const minutes = now.getMinutes() < 10 ? "0" + now.getMinutes() : now.getMinutes()
+        const day = (now.getDate() < 10) ? "0" + now.getDate() : now.getDate()
+        const month = (now.getMonth() + 1) < 10 ? "0" + (now.getMonth() + 1) : now.getMonth() + 1
+        const year = now.getFullYear()
+    
+        timeLimit.value = `${hours}:${minutes}`
+        dateLimit.value = `${year}-${month}-${day}`
+        updateTimeLeft()
         console.log(e)
     }
+    showLimits()
 }
 
 function onWindowClose() {
