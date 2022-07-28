@@ -46,7 +46,7 @@ input[type="date"] {
 }
 
 #timer {
-    color: rgb(255, 116, 139);
+    color: #e0e0e0;
     font-size: 4.5em;
     display: flex;
     height: 140px;
