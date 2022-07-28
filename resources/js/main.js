@@ -38,12 +38,13 @@ async function startCountDown() {
             countDownDate = new Date().getTime() + (timeLeft > 0 ? timeLeft + 1000 : 1000)
             countDownWorker = new Worker('js/worker.js')
             countDownWorker.onmessage = countDownFunction
-            ws = new WebSocket(`wss:davicoelho.com.br/?channel=${channelName.value}`)
+            ws = new WebSocket(`wss:davicoelho.com.br/wheel-countdown/?channel=${channelName.value}`)
 
-            ws.onopen = function () {
+            ws.onopen = async function () {
+                updateWebTimer('start', countDownDate, true)
                 ws.send('conectado!')
             }
-            
+
             ws.onmessage = function (msg) {
                 console.log(msg.data)
                 if (!enableLimit.checked || (countDownDate + parseFloat(msg.data)) <= maxTimeValue) {
@@ -51,6 +52,7 @@ async function startCountDown() {
                 } else {
                     countDownDate = maxTimeValue
                 }
+                updateWebTimer('update', countDownDate, true)
             }
         } else {
             pauseButton.value = 'Pausar'
@@ -59,12 +61,35 @@ async function startCountDown() {
             switchMode(false)
             timeLeft = 0
             updateTimer()
+            updateWebTimer('stop', 0, false)
             countDownWorker.terminate()
             countDownWorker = undefined
             ws.close()
             await Neutralino.filesystem.writeFile('./timer.txt', "00:00:00")
         }
     }
+}
+
+function updateWebTimer(type, countDownDate, running) {
+    var myHeaders = new Headers();
+    myHeaders.append("Content-Type", "application/x-www-form-urlencoded");
+
+    var urlencoded = new URLSearchParams();
+    urlencoded.append("type", type);
+    urlencoded.append("finalDate", countDownDate);
+    urlencoded.append("running", running);
+
+    var requestOptions = {
+        method: 'POST',
+        headers: myHeaders,
+        body: urlencoded,
+        mode: 'no-cors'
+    };
+
+    fetch(`https://davicoelho.com.br/subathon/timer/${channelName.value}`, requestOptions)
+        .then(response => response.text())
+        .then(result => console.log(result))
+        .catch(error => console.log('error', error));
 }
 
 async function updateTimer() {
@@ -91,6 +116,7 @@ async function countDownFunction() {
         switchMode(false)
         timeLeft = 0
         updateTimer()
+        updateWebTimer('stop', 0, false)
         countDownWorker.terminate()
         countDownWorker = undefined
         ws.close()
@@ -106,12 +132,14 @@ function pauseCountDown() {
         countDownDate = new Date().getTime() + timeLeft
         countDownWorker = new Worker('js/worker.js')
         countDownWorker.onmessage = countDownFunction
+        updateWebTimer('resume', countDownDate, true)
     } else {
         pause = true
         pauseButton.value = 'Resumir'
         pauseButton.classList.add('paused')
         countDownWorker.terminate()
         countDownWorker = undefined
+        updateWebTimer('pause', countDownDate, false)
     }
 }
 
@@ -143,7 +171,8 @@ async function changeTimer(element) {
         updateTimer()
     } else {
         countDownDate += value
-    }
+        updateWebTimer('update', countDownDate, true)
+    }    
 }
 
 function switchMode(state) {
@@ -192,7 +221,7 @@ function updateDeadEnd() {
         const day = (deadEnd.getDate() < 10) ? "0" + deadEnd.getDate() : deadEnd.getDate()
         const month = (deadEnd.getMonth() + 1) < 10 ? "0" + (deadEnd.getMonth() + 1) : deadEnd.getMonth() + 1
         const year = deadEnd.getFullYear()
-    
+
         timeLimit.value = `${hours}:${minutes}`
         dateLimit.value = `${year}-${month}-${day}`
     }
@@ -254,7 +283,7 @@ async function loadConfig() {
         const day = (now.getDate() < 10) ? "0" + now.getDate() : now.getDate()
         const month = (now.getMonth() + 1) < 10 ? "0" + (now.getMonth() + 1) : now.getMonth() + 1
         const year = now.getFullYear()
-    
+
         timeLimit.value = `${hours}:${minutes}`
         dateLimit.value = `${year}-${month}-${day}`
         updateTimeLeft()
